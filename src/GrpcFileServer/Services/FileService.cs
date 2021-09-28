@@ -44,7 +44,7 @@ namespace GrpcFileServer.Services
                     // All file transfer completed. (Block = -2)
                     if (currentFileContent.Block == -2)
                     {
-                        _logger.LogInformation($"{mark}，完成上傳檔案。共計【{filePaths.Count}】個，耗時：{DateTime.Now - startTime}");
+                        _logger.LogInformation($"{mark}，完成上傳檔案。共計【{filePaths.Count}】個，耗時：{DateTime.Now - startTime}。");
                         break;
                     }
                     // file transfer canceled. (Block = -1)
@@ -98,7 +98,7 @@ namespace GrpcFileServer.Services
                         {
                             savePath = Path.Combine(_config["FileAccessSettings:Root"], currentFileContent.Filename);
                             fs = new FileStream(savePath, FileMode.Create, FileAccess.ReadWrite);
-                            _logger.LogInformation($"{mark}，上傳檔案：{savePath}，{DateTime.UtcNow:HH:mm:ss:ffff}");
+                            _logger.LogInformation($"{mark}，上傳檔案：{savePath}，{DateTime.UtcNow:HH:mm:ss:ffff}。");
                         }
 
                         // Add current file content to list.
@@ -115,7 +115,7 @@ namespace GrpcFileServer.Services
             }
             catch (Exception ex)
             {
-                _logger.LogError($"{mark}，發生異常({ex.GetType()})：{ex.Message}");
+                _logger.LogError($"{mark}，發生異常({ex.GetType()})：{ex.Message}。");
             }
             finally
             {
@@ -149,7 +149,7 @@ namespace GrpcFileServer.Services
                         Mark = mark
                     };
 
-                    _logger.LogInformation($"{mark}，下載檔案：{filePath}");
+                    _logger.LogInformation($"{mark}，下載檔案：{filePath}。");
 
                     if (System.IO.File.Exists(filePath))
                     {
@@ -175,7 +175,7 @@ namespace GrpcFileServer.Services
                                 reply.Content = Google.Protobuf.ByteString.Empty;
                                 await responseStream.WriteAsync(reply);
                                 successFileNames.Add(fileName);
-                                _logger.LogInformation($"{mark}，完成傳送檔案：{filePath}");
+                                _logger.LogInformation($"{mark}，完成傳送檔案：{filePath}。");
                                 break;
                             }
                         }
@@ -184,7 +184,7 @@ namespace GrpcFileServer.Services
                     }
                     else
                     {
-                        _logger.LogInformation($"檔案【{filePath}】不存在。");
+                        _logger.LogInformation($"檔案【{filePath}】不存在！");
                         reply.Block = -1; // -1 means file not exists, like file transfer canceled situation.
                         await responseStream.WriteAsync(reply);
                     }
@@ -201,14 +201,14 @@ namespace GrpcFileServer.Services
             }
             catch (Exception ex)
             {
-                _logger.LogError($"{mark}，發生異常({ex.GetType()})：{ex.Message}");
+                _logger.LogError($"{mark}，發生異常({ex.GetType()})：{ex.Message}。");
             }
             finally
             {
                 fs?.Dispose();
             }
 
-            _logger.LogInformation($"{mark}，檔案傳輸完成。共計【{successFileNames.Count / request.Filenames.Count}】，耗時：{DateTime.Now - startTime}");
+            _logger.LogInformation($"{mark}，檔案傳輸完成。共計【{successFileNames.Count / request.Filenames.Count}】，耗時：{DateTime.Now - startTime}。");
         }
     }
 }
