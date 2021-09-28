@@ -94,6 +94,7 @@ namespace GrpcFileServer.Services
                     }
                     else
                     {
+                        // save path is empty means file probably coming.
                         if (string.IsNullOrEmpty(savePath))
                         {
                             savePath = Path.Combine(_config["FileAccessSettings:Root"], reply.Filename);
@@ -104,7 +105,7 @@ namespace GrpcFileServer.Services
                         // Add current file content to list.
                         fileContents.Add(reply);
 
-                        // Collect 20 file content, then write into file stream. (current file content = 1M, but this decide by client code...)
+                        // Collect 20 file content, then write into file stream. (current file content = 1M, but this size decide by client code...)
                         if (fileContents.Count >= 20)
                         {
                             fileContents.OrderBy(c => c.Block).ToList().ForEach(c => c.Content.WriteTo(fs));

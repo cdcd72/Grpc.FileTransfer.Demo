@@ -1,6 +1,11 @@
 using System;
+using System.IO;
 using System.Windows.Forms;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Configuration.Json;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.FileProviders;
+using NLog.Extensions.Logging;
 
 namespace GrpcFileClient
 {
@@ -26,7 +31,25 @@ namespace GrpcFileClient
 
         private static void ConfigureServices(ServiceCollection services)
         {
-            services.AddLogging();
+            services.AddLogging(builder => builder.AddNLog("Nlog.config"));
+
+            #region Configuration
+
+            var releaseJsonSource = new JsonConfigurationSource()
+            {
+                FileProvider = new PhysicalFileProvider(Directory.GetCurrentDirectory()),
+                Path = "appsettings.json",
+                Optional = false,
+                ReloadOnChange = true
+            };
+
+            var config = new ConfigurationBuilder()
+                .Add(releaseJsonSource)
+                .Build();
+
+            services.AddSingleton<IConfiguration>(config);
+
+            #endregion
 
             services.AddScoped<FileTransfer>();
 

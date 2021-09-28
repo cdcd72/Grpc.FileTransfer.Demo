@@ -5,7 +5,7 @@ namespace GrpcFileClient.Models
         /// <summary>
         /// 傳輸是否成功
         /// </summary>
-        public bool IsSuccessful { get; set; }
+        public bool IsSuccess { get; set; }
 
         /// <summary>
         /// 訊息
@@ -13,8 +13,8 @@ namespace GrpcFileClient.Models
         public string Message { get; set; }
 
         /// <summary>
-        /// 標記型別
+        /// 記錄
         /// </summary>
-        public T Tag { get; set; }
+        public T Record { get; set; }
     }
 }
