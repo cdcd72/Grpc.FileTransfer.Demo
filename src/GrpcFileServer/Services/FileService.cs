@@ -72,7 +72,7 @@ namespace GrpcFileServer.Services
                     {
                         if (string.IsNullOrEmpty(savePath)) // 有新檔案來了
                         {
-                            savePath = Path.Combine(@"D:\Output\File", reply.Filename); // 檔案路徑
+                            savePath = Path.Combine(@"D:\Output\File\Upload", reply.Filename); // 檔案路徑
                             fs = new FileStream(savePath, FileMode.Create, FileAccess.ReadWrite);
                             _logger.LogInformation($"{mark}，上傳檔案：{savePath}，{DateTime.UtcNow:HH:mm:ss:ffff}");
                         }
@@ -109,7 +109,7 @@ namespace GrpcFileServer.Services
                 for (var i = 0; i < request.Filenames.Count; i++)
                 {
                     var fileName = request.Filenames[i]; // 檔名
-                    var filePath = Path.Combine(@"D:\Output\File", fileName); // 檔案路徑
+                    var filePath = Path.Combine(@"D:\Output\File\Upload", fileName); // 檔案路徑
                     var reply = new DownloadResponse
                     {
                         Filename = fileName,

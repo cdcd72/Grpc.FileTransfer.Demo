@@ -26,6 +26,10 @@ namespace GrpcFileClient
 
         private static void ConfigureServices(ServiceCollection services)
         {
+            services.AddLogging();
+
+            services.AddScoped<FileTransfer>();
+
             services.AddScoped<GrpcFileClientForm>();
         }
     }
