@@ -24,23 +24,30 @@ namespace GrpcFileClient
 
         private void OpenUploadButton_Click(object sender, EventArgs e)
         {
-            lblUploadPath.Text = GetFilePath();
+            //lblUploadPath.Text = GetFilePath();
+
+            foreach (var filePath in GetFilePaths())
+            {
+                FilePathListBox.Items.Add(filePath);
+            }
         }
 
         private string GetFilePath()
         {
+            openFileDialog.Multiselect = true;
+
             // Create OpenFileDialog 
-            var dlg = openFileDialog1;
+            var dlg = openFileDialog;
 
             // Set filter for file extension and default file extension 
-            dlg.Title = "選擇檔案";
-            dlg.Filter = "所有檔案(*.*)|*.*";
-            dlg.FileName = "選擇資料夾.";
-            dlg.FilterIndex = 1;
-            dlg.ValidateNames = false;
-            dlg.CheckFileExists = false;
-            dlg.CheckPathExists = true;
-            dlg.Multiselect = false;//允許同時選擇多個檔案 
+            //dlg.Title = "選擇檔案";
+            //dlg.Filter = "所有檔案(*.*)|*.*";
+            //dlg.FileName = "選擇資料夾.";
+            //dlg.FilterIndex = 1;
+            //dlg.ValidateNames = false;
+            //dlg.CheckFileExists = false;
+            //dlg.CheckPathExists = true;
+            //dlg.Multiselect = false;//允許同時選擇多個檔案 
 
             // Display OpenFileDialog by calling ShowDialog method 
             var result = dlg.ShowDialog();
@@ -53,6 +60,18 @@ namespace GrpcFileClient
             }
 
             return string.Empty;
+        }
+
+        private string[] GetFilePaths()
+        {
+            openFileDialog.Multiselect = true;
+
+            var result = openFileDialog.ShowDialog();
+
+            if (result == DialogResult.OK)
+                return openFileDialog.FileNames;
+
+            return Array.Empty<string>();
         }
 
         CancellationTokenSource uploadTokenSource;
@@ -84,7 +103,7 @@ namespace GrpcFileClient
 
             downloadTokenSource = new CancellationTokenSource();
             var fileNames = new List<string>();
-            fileNames.Add(textBox1.Text);
+            fileNames.Add(FileNamesTextBox.Text);
             var result = await _fileTransfer.FileDownload(fileNames, "123", @"D:\Output\File\Download", downloadTokenSource.Token);
 
             lblMessage1.Text = result.Message;
