@@ -37,20 +37,20 @@ namespace GrpcFileServer.Services
             {
                 while (await requestStream.MoveNext())
                 {
-                    var currentFileContent = requestStream.Current;
+                    var reply = requestStream.Current;
 
-                    mark = currentFileContent.Mark;
+                    mark = reply.Mark;
 
                     // All file transfer completed. (Block = -2)
-                    if (currentFileContent.Block == -2)
+                    if (reply.Block == -2)
                     {
                         _logger.LogInformation($"{mark}，完成上傳檔案。共計【{filePaths.Count}】個，耗時：{DateTime.Now - startTime}。");
                         break;
                     }
                     // file transfer canceled. (Block = -1)
-                    else if (currentFileContent.Block == -1)
+                    else if (reply.Block == -1)
                     {
-                        _logger.LogInformation($"檔案【{currentFileContent.Filename}】取消傳輸！");
+                        _logger.LogInformation($"檔案【{reply.Filename}】取消傳輸！");
 
                         #region Clean file and reset variable
 
@@ -67,7 +67,7 @@ namespace GrpcFileServer.Services
                         break;
                     }
                     // file transfer completed. (Block = 0)
-                    else if (currentFileContent.Block == 0)
+                    else if (reply.Block == 0)
                     {
                         #region Write file and reset variable
 
@@ -88,7 +88,7 @@ namespace GrpcFileServer.Services
                         // Tell client file transfer completed.
                         await responseStream.WriteAsync(new UploadResponse
                         {
-                            Filename = currentFileContent.Filename,
+                            Filename = reply.Filename,
                             Mark = mark
                         });
                     }
@@ -96,13 +96,13 @@ namespace GrpcFileServer.Services
                     {
                         if (string.IsNullOrEmpty(savePath))
                         {
-                            savePath = Path.Combine(_config["FileAccessSettings:Root"], currentFileContent.Filename);
+                            savePath = Path.Combine(_config["FileAccessSettings:Root"], reply.Filename);
                             fs = new FileStream(savePath, FileMode.Create, FileAccess.ReadWrite);
                             _logger.LogInformation($"{mark}，上傳檔案：{savePath}，{DateTime.UtcNow:HH:mm:ss:ffff}。");
                         }
 
                         // Add current file content to list.
-                        fileContents.Add(currentFileContent);
+                        fileContents.Add(reply);
 
                         // Collect 20 file content, then write into file stream. (current file content = 1M, but this decide by client code...)
                         if (fileContents.Count >= 20)
