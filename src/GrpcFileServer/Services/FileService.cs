@@ -101,10 +101,10 @@ namespace GrpcFileServer.Services
                             _logger.LogInformation($"{mark}，上傳檔案：{savePath}，{DateTime.UtcNow:HH:mm:ss:ffff}");
                         }
 
-                        // Add current file content to list
+                        // Add current file content to list.
                         fileContents.Add(currentFileContent);
 
-                        // Collect 20 file content, then write into file stream (current file content = 1M, but this decide by client code...)
+                        // Collect 20 file content, then write into file stream. (current file content = 1M, but this decide by client code...)
                         if (fileContents.Count >= 20)
                         {
                             fileContents.OrderBy(c => c.Block).ToList().ForEach(c => c.Content.WriteTo(fs));
@@ -133,7 +133,7 @@ namespace GrpcFileServer.Services
             FileStream fs = null;
             var startTime = DateTime.Now;
             var mark = request.Mark;
-            // file chunk equal 1 megabytes
+            // file chunk equal 1 megabytes.
             var chunkSize = 1024 * 1024;
             var buffer = new byte[chunkSize];
 
@@ -161,7 +161,7 @@ namespace GrpcFileServer.Services
                         {
                             var readSise = fs.Read(buffer, 0, buffer.Length);
 
-                            // Transfer file chunk to client
+                            // Transfer file chunk to client.
                             if (readSise > 0)
                             {
                                 reply.Block = ++readTimes;
