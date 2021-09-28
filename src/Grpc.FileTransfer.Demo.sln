@@ -10,6 +10,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution", "Solution", "{1D
 		.editorconfig = .editorconfig
 	EndProjectSection
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GrpcFileClient", "GrpcFileClient\GrpcFileClient.csproj", "{70A37616-DCA7-4AB4-AF2A-1E808D5E62C7}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -20,6 +22,10 @@ Global
 		{F25CDEE2-7BD0-4B16-9667-486C7066FD79}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F25CDEE2-7BD0-4B16-9667-486C7066FD79}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F25CDEE2-7BD0-4B16-9667-486C7066FD79}.Release|Any CPU.Build.0 = Release|Any CPU
+		{70A37616-DCA7-4AB4-AF2A-1E808D5E62C7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{70A37616-DCA7-4AB4-AF2A-1E808D5E62C7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{70A37616-DCA7-4AB4-AF2A-1E808D5E62C7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{70A37616-DCA7-4AB4-AF2A-1E808D5E62C7}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
