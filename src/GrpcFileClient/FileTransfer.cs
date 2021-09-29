@@ -6,7 +6,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using Grpc.Net.Client;
 using GrpcFileClient.Models;
-using GrpcFileServer;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 
@@ -44,7 +43,7 @@ namespace GrpcFileClient
             var chunkSize = 1024 * 1024;
             var buffer = new byte[chunkSize];
             var channel = GrpcChannel.ForAddress(_config["Url:GrpcFileServer"]);
-            var client = new GrpcFileServer.File.FileClient(channel);
+            var client = new GrpcFileClient.File.FileClient(channel);
 
             try
             {
@@ -183,7 +182,7 @@ namespace GrpcFileClient
             var startTime = DateTime.Now;
             var savePath = string.Empty;
             var channel = GrpcChannel.ForAddress(_config["Url:GrpcFileServer"]);
-            var client = new GrpcFileServer.File.FileClient(channel);
+            var client = new GrpcFileClient.File.FileClient(channel);
 
             try
             {
