@@ -31,6 +31,7 @@ namespace GrpcFileServer.Services
             FileStream fs = null;
             var startTime = DateTime.Now;
             var mark = string.Empty;
+            var uploadPath = Path.Combine(_config["FileAccessSettings:Root"], _config["FileAccessSettings:Directory:Upload"]);
             var savePath = string.Empty;
 
             try
@@ -97,7 +98,7 @@ namespace GrpcFileServer.Services
                         // save path is empty means file probably coming.
                         if (string.IsNullOrEmpty(savePath))
                         {
-                            savePath = Path.Combine(_config["FileAccessSettings:Root"], reply.Filename);
+                            savePath = Path.Combine(uploadPath, reply.Filename);
                             fs = new FileStream(savePath, FileMode.Create, FileAccess.ReadWrite);
                             _logger.LogInformation($"{mark}，上傳檔案：{savePath}，{DateTime.UtcNow:HH:mm:ss:ffff}。");
                         }
@@ -137,13 +138,14 @@ namespace GrpcFileServer.Services
             // file chunk equal 1 megabytes.
             var chunkSize = 1024 * 1024;
             var buffer = new byte[chunkSize];
+            var downloadPath = Path.Combine(_config["FileAccessSettings:Root"], _config["FileAccessSettings:Directory:Upload"]);
 
             try
             {
                 for (var i = 0; i < request.Filenames.Count; i++)
                 {
                     var fileName = request.Filenames[i];
-                    var filePath = Path.Combine(_config["FileAccessSettings:Root"], fileName);
+                    var filePath = Path.Combine(downloadPath, fileName);
                     var reply = new DownloadResponse
                     {
                         Filename = fileName,

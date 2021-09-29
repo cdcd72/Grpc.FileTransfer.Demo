@@ -1,65 +1,30 @@
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
+using System.IO;
 using System.Linq;
-using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 using System.Windows.Forms;
+using Microsoft.Extensions.Configuration;
 
 namespace GrpcFileClient
 {
     public partial class GrpcFileClientForm : Form
     {
+        private readonly IConfiguration _config;
         private readonly FileTransfer _fileTransfer;
 
-        public GrpcFileClientForm(FileTransfer fileTransfer)
+        public GrpcFileClientForm(IConfiguration config, FileTransfer fileTransfer)
         {
             InitializeComponent();
 
+            _config = config;
             _fileTransfer = fileTransfer;
         }
 
         private void OpenUploadButton_Click(object sender, EventArgs e)
         {
-            //lblUploadPath.Text = GetFilePath();
-
-            foreach (var filePath in GetFilePaths())
-            {
-                FilePathListBox.Items.Add(filePath);
-            }
-        }
-
-        private string GetFilePath()
-        {
-            openFileDialog.Multiselect = true;
-
-            // Create OpenFileDialog 
-            var dlg = openFileDialog;
-
-            // Set filter for file extension and default file extension 
-            //dlg.Title = "選擇檔案";
-            //dlg.Filter = "所有檔案(*.*)|*.*";
-            //dlg.FileName = "選擇資料夾.";
-            //dlg.FilterIndex = 1;
-            //dlg.ValidateNames = false;
-            //dlg.CheckFileExists = false;
-            //dlg.CheckPathExists = true;
-            //dlg.Multiselect = false;//允許同時選擇多個檔案 
-
-            // Display OpenFileDialog by calling ShowDialog method 
-            var result = dlg.ShowDialog();
-
-            // Get the selected file name and display in a TextBox 
-            if (result == DialogResult.OK)
-            {
-                // Open document 
-                return dlg.FileName;
-            }
-
-            return string.Empty;
+            FilePathListBox.Items.Clear();
+            FilePathListBox.Items.AddRange(GetFilePaths());
         }
 
         private string[] GetFilePaths()
@@ -81,19 +46,23 @@ namespace GrpcFileClient
             lblMessage.Text = string.Empty;
 
             uploadTokenSource = new CancellationTokenSource();
-            var fileNames = new List<string>();
-            fileNames.Add(lblUploadPath.Text);
-            var result = await _fileTransfer.FileUpload(fileNames, "123", uploadTokenSource.Token);
+
+            var filePaths = new List<string>();
+
+            foreach (var item in FilePathListBox.Items)
+            {
+                filePaths.Add($"{item}");
+            }
+
+            var result =
+                await _fileTransfer.FileUpload(filePaths, $"{Guid.NewGuid()}", uploadTokenSource.Token);
 
             lblMessage.Text = result.Message;
 
             uploadTokenSource = null;
         }
 
-        private void CancelUploadButton_Click(object sender, EventArgs e)
-        {
-            uploadTokenSource?.Cancel();
-        }
+        private void CancelUploadButton_Click(object sender, EventArgs e) => uploadTokenSource?.Cancel();
 
         CancellationTokenSource downloadTokenSource;
 
@@ -102,18 +71,20 @@ namespace GrpcFileClient
             lblMessage1.Text = string.Empty;
 
             downloadTokenSource = new CancellationTokenSource();
-            var fileNames = new List<string>();
-            fileNames.Add(FileNamesTextBox.Text);
-            var result = await _fileTransfer.FileDownload(fileNames, "123", @"D:\Output\File\Download", downloadTokenSource.Token);
+
+            var fileNames = FileNamesTextBox.Text.Split(',', StringSplitOptions.RemoveEmptyEntries)
+                                                 .ToList();
+
+            var downloadToPath = Path.Combine(_config["FileAccessSettings:Root"], _config["FileAccessSettings:Directory:Download"]);
+
+            var result =
+                await _fileTransfer.FileDownload(fileNames, $"{Guid.NewGuid()}", downloadToPath, downloadTokenSource.Token);
 
             lblMessage1.Text = result.Message;
 
             downloadTokenSource = null;
         }
 
-        private void CancelDownloadButton_Click(object sender, EventArgs e)
-        {
-            downloadTokenSource?.Cancel();
-        }
+        private void CancelDownloadButton_Click(object sender, EventArgs e) => downloadTokenSource?.Cancel();
     }
 }

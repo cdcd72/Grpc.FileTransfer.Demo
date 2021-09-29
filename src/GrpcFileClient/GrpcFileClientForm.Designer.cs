@@ -137,18 +137,18 @@
             this.SelectedFilesLabel.AutoSize = true;
             this.SelectedFilesLabel.Location = new System.Drawing.Point(12, 9);
             this.SelectedFilesLabel.Name = "SelectedFilesLabel";
-            this.SelectedFilesLabel.Size = new System.Drawing.Size(106, 19);
+            this.SelectedFilesLabel.Size = new System.Drawing.Size(118, 19);
             this.SelectedFilesLabel.TabIndex = 10;
-            this.SelectedFilesLabel.Text = "Selected Files:";
+            this.SelectedFilesLabel.Text = "Selected Files：";
             // 
             // label1
             // 
             this.label1.AutoSize = true;
             this.label1.Location = new System.Drawing.Point(12, 236);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(132, 19);
+            this.label1.Size = new System.Drawing.Size(295, 19);
             this.label1.TabIndex = 11;
-            this.label1.Text = "Typed FileNames:";
+            this.label1.Text = "Typed FileNames（Split with comma）：";
             // 
             // GrpcFileClientForm
             // 
