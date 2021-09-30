@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Windows.Forms;
+using GrpcFileClient.Services;
 using Microsoft.Extensions.Configuration;
 
 namespace GrpcFileClient
@@ -11,14 +12,14 @@ namespace GrpcFileClient
     public partial class GrpcFileClientForm : Form
     {
         private readonly IConfiguration _config;
-        private readonly FileTransfer _fileTransfer;
+        private readonly FileService _fileService;
 
-        public GrpcFileClientForm(IConfiguration config, FileTransfer fileTransfer)
+        public GrpcFileClientForm(IConfiguration config, FileService fileService)
         {
             InitializeComponent();
 
             _config = config;
-            _fileTransfer = fileTransfer;
+            _fileService = fileService;
         }
 
         private void OpenUploadButton_Click(object sender, EventArgs e)
@@ -39,11 +40,11 @@ namespace GrpcFileClient
             return Array.Empty<string>();
         }
 
-        CancellationTokenSource uploadTokenSource;
+        private CancellationTokenSource uploadTokenSource;
 
         private async void UploadButton_Click(object sender, EventArgs e)
         {
-            lblMessage.Text = string.Empty;
+            lblMessage.Text = "正在上傳檔案中...";
 
             uploadTokenSource = new CancellationTokenSource();
 
@@ -55,7 +56,7 @@ namespace GrpcFileClient
             }
 
             var result =
-                await _fileTransfer.FileUpload(filePaths, $"{Guid.NewGuid()}", uploadTokenSource.Token);
+                await _fileService.FileUpload(filePaths, $"{Guid.NewGuid()}", uploadTokenSource.Token);
 
             lblMessage.Text = result.Message;
 
@@ -64,11 +65,11 @@ namespace GrpcFileClient
 
         private void CancelUploadButton_Click(object sender, EventArgs e) => uploadTokenSource?.Cancel();
 
-        CancellationTokenSource downloadTokenSource;
+        private CancellationTokenSource downloadTokenSource;
 
         private async void DownloadButton_Click(object sender, EventArgs e)
         {
-            lblMessage1.Text = string.Empty;
+            lblMessage1.Text = "正在下載檔案中...";
 
             downloadTokenSource = new CancellationTokenSource();
 
@@ -78,7 +79,7 @@ namespace GrpcFileClient
             var downloadToPath = Path.Combine(_config["FileAccessSettings:Root"], _config["FileAccessSettings:Directory:Download"]);
 
             var result =
-                await _fileTransfer.FileDownload(fileNames, $"{Guid.NewGuid()}", downloadToPath, downloadTokenSource.Token);
+                await _fileService.FileDownload(fileNames, $"{Guid.NewGuid()}", downloadToPath, downloadTokenSource.Token);
 
             lblMessage1.Text = result.Message;
 

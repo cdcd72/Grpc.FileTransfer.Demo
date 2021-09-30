@@ -4,20 +4,23 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Grpc.Core;
+using Infra.Core.FileAccess.Abstractions;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 
 namespace GrpcFileServer.Services
 {
-    public class FileService : File.FileBase
+    public class FileService : FileTransfer.FileTransferBase
     {
         private readonly ILogger<FileService> _logger;
         private readonly IConfiguration _config;
+        private readonly IFileAccess _fileAccess;
 
-        public FileService(ILogger<FileService> logger, IConfiguration config)
+        public FileService(ILogger<FileService> logger, IConfiguration config, IFileAccess fileAccess)
         {
             _logger = logger;
             _config = config;
+            _fileAccess = fileAccess;
         }
 
         public override async Task Upload(
@@ -58,8 +61,8 @@ namespace GrpcFileServer.Services
                         fileContents.Clear();
                         fs?.Close();
 
-                        if (!string.IsNullOrEmpty(savePath) && System.IO.File.Exists(savePath))
-                            System.IO.File.Delete(savePath);
+                        if (!string.IsNullOrEmpty(savePath) && _fileAccess.FileExists(savePath))
+                            _fileAccess.DeleteFile(savePath);
 
                         savePath = string.Empty;
 
@@ -154,7 +157,7 @@ namespace GrpcFileServer.Services
 
                     _logger.LogInformation($"{mark}，下載檔案：{filePath}。");
 
-                    if (System.IO.File.Exists(filePath))
+                    if (_fileAccess.FileExists(filePath))
                     {
                         fs = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.Read, chunkSize, useAsync: true);
 

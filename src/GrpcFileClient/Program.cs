@@ -1,6 +1,9 @@
 using System;
 using System.IO;
 using System.Windows.Forms;
+using GrpcFileClient.Services;
+using Infra.Core.FileAccess.Abstractions;
+using Infra.FileAccess.Physical;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Configuration.Json;
 using Microsoft.Extensions.DependencyInjection;
@@ -51,7 +54,9 @@ namespace GrpcFileClient
 
             #endregion
 
-            services.AddScoped<FileTransfer>();
+            services.AddSingleton<IFileAccess, PhysicalFileAccess>();
+
+            services.AddScoped<FileService>();
 
             services.AddScoped<GrpcFileClientForm>();
         }

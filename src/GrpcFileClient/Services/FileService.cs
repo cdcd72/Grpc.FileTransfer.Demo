@@ -6,20 +6,23 @@ using System.Threading;
 using System.Threading.Tasks;
 using Grpc.Net.Client;
 using GrpcFileClient.Models;
+using Infra.Core.FileAccess.Abstractions;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 
-namespace GrpcFileClient
+namespace GrpcFileClient.Services
 {
-    public class FileTransfer
+    public class FileService
     {
-        private readonly ILogger<FileTransfer> _logger;
+        private readonly ILogger<FileService> _logger;
         private readonly IConfiguration _config;
+        private readonly IFileAccess _fileAccess;
 
-        public FileTransfer(ILogger<FileTransfer> logger, IConfiguration config)
+        public FileService(ILogger<FileService> logger, IConfiguration config, IFileAccess fileAccess)
         {
             _logger = logger;
             _config = config;
+            _fileAccess = fileAccess;
         }
 
         public async Task<TransferResult<List<string>>> FileUpload(
@@ -43,7 +46,7 @@ namespace GrpcFileClient
             var chunkSize = 1024 * 1024;
             var buffer = new byte[chunkSize];
             var channel = GrpcChannel.ForAddress(_config["Url:GrpcFileServer"]);
-            var client = new GrpcFileClient.File.FileClient(channel);
+            var client = new FileTransfer.FileTransferClient(channel);
 
             try
             {
@@ -53,9 +56,12 @@ namespace GrpcFileClient
                 {
                     // Initiative cancel.
                     if (cancellationToken.IsCancellationRequested)
+                    {
+                        result.Message = $"取消了上傳檔案。已完成【{successFilePaths.Count}/{filePaths.Count}】，耗時：{DateTime.Now - startTime}。";
                         break;
+                    }
 
-                    if (!System.IO.File.Exists(filePath))
+                    if (!_fileAccess.FileExists(filePath))
                     {
                         _logger.LogInformation($"檔案不存在：{filePath}。");
                         continue;
@@ -79,6 +85,7 @@ namespace GrpcFileClient
                             reply.Block = -1; // -1 means file transfer canceled.
                             reply.Content = Google.Protobuf.ByteString.Empty;
                             await call.RequestStream.WriteAsync(reply);
+                            result.Message = $"取消了上傳檔案。已完成【{successFilePaths.Count}/{filePaths.Count}】，耗時：{DateTime.Now - startTime}。";
                             break;
                         }
 
@@ -132,8 +139,7 @@ namespace GrpcFileClient
                 if (cancellationToken.IsCancellationRequested)
                 {
                     fs?.Close();
-                    result.IsSuccess = false;
-                    result.Message = $"使用者取消了上傳檔案。已完成【{successFilePaths.Count}/{filePaths.Count}】，耗時：{DateTime.Now - startTime}。";
+                    result.Message = $"取消了上傳檔案。已完成【{successFilePaths.Count}/{filePaths.Count}】，耗時：{DateTime.Now - startTime}。";
                 }
                 else
                 {
@@ -167,7 +173,7 @@ namespace GrpcFileClient
             // No file to download.
             if (fileNames.Count == 0)
             {
-                result.Message = "未包含任何檔案。";
+                result.Message = "沒有檔案需要下載。";
                 return await Task.Run(() => result);
             }
 
@@ -182,7 +188,7 @@ namespace GrpcFileClient
             var startTime = DateTime.Now;
             var savePath = string.Empty;
             var channel = GrpcChannel.ForAddress(_config["Url:GrpcFileServer"]);
-            var client = new GrpcFileClient.File.FileClient(channel);
+            var client = new FileTransfer.FileTransferClient(channel);
 
             try
             {
@@ -195,7 +201,10 @@ namespace GrpcFileClient
                 {
                     // Initiative cancel.
                     if (cancellationToken.IsCancellationRequested)
+                    {
+                        result.Message = $"取消了下載檔案。已完成【{successFileNames.Count}/{fileNames.Count}】，耗時：{DateTime.Now - startTime}。";
                         break;
+                    }
 
                     // All file transfer completed. (Block = -2)
                     if (reaponseStream.Current.Block == -2)
@@ -214,8 +223,8 @@ namespace GrpcFileClient
                         fileContents.Clear();
                         fs?.Close();
 
-                        if (!string.IsNullOrEmpty(savePath) && System.IO.File.Exists(savePath))
-                            System.IO.File.Delete(savePath);
+                        if (!string.IsNullOrEmpty(savePath) && _fileAccess.FileExists(savePath))
+                            _fileAccess.DeleteFile(savePath);
 
                         savePath = string.Empty;
 
@@ -264,16 +273,15 @@ namespace GrpcFileClient
                 fs?.Close();
 
                 // if download failed, then clean exists file.
-                if (!result.IsSuccess && !string.IsNullOrEmpty(savePath) && System.IO.File.Exists(savePath))
-                    System.IO.File.Delete(savePath);
+                if (!result.IsSuccess && !string.IsNullOrEmpty(savePath) && _fileAccess.FileExists(savePath))
+                    _fileAccess.DeleteFile(savePath);
             }
             catch (Exception ex)
             {
                 if (cancellationToken.IsCancellationRequested)
                 {
                     fs?.Close();
-                    result.IsSuccess = false;
-                    result.Message = $"使用者取消下載。已完成下載【{successFileNames.Count}/{fileNames.Count}】，耗時：{DateTime.Now - startTime}。";
+                    result.Message = $"取消了下載檔案。已完成【{successFileNames.Count}/{fileNames.Count}】，耗時：{DateTime.Now - startTime}。";
                 }
                 else
                 {

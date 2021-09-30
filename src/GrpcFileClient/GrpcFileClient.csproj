@@ -38,6 +38,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\InfrastructureCollection\src\Infra\FileAccess\Infra.FileAccess.Physical\Infra.FileAccess.Physical.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Protobuf Include="Protos\file.proto" GrpcServices="Client" />
   </ItemGroup>
 
