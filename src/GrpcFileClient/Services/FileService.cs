@@ -28,7 +28,8 @@ namespace GrpcFileClient.Services
         public async Task<TransferResult<List<string>>> FileUpload(
             List<string> filePaths,
             string mark,
-            CancellationToken cancellationToken = new CancellationToken())
+            CancellationToken cancellationToken = new CancellationToken(),
+            Action<string> progressCallBack = null)
         {
             var result = new TransferResult<List<string>> { Message = "沒有檔案需要上傳。" };
 
@@ -76,6 +77,7 @@ namespace GrpcFileClient.Services
                     fs = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.Read, chunkSize, useAsync: true);
 
                     var readTimes = 0;
+                    var uploadedSize = 0;
 
                     while (true)
                     {
@@ -97,6 +99,8 @@ namespace GrpcFileClient.Services
                             reply.Block = ++readTimes;
                             reply.Content = Google.Protobuf.ByteString.CopyFrom(buffer, 0, readSize);
                             await call.RequestStream.WriteAsync(reply);
+                            uploadedSize += readSize;
+                            progressCallBack?.Invoke($"目前已上傳進度【{uploadedSize}/{fs.Length}】位元組。");
                         }
                         // Transfer is completed.
                         else
@@ -163,7 +167,8 @@ namespace GrpcFileClient.Services
             List<string> fileNames,
             string mark,
             string saveDirectoryPath,
-            CancellationToken cancellationToken = new CancellationToken())
+            CancellationToken cancellationToken = new CancellationToken(),
+            Action<string> progressCallBack = null)
         {
             var result = new TransferResult<List<string>>() { Message = $"檔案儲存路徑不正確：{saveDirectoryPath}。" };
 
@@ -238,6 +243,7 @@ namespace GrpcFileClient.Services
                         if (fileContents.Any())
                         {
                             fileContents.OrderBy(c => c.Block).ToList().ForEach(c => c.Content.WriteTo(fs));
+                            progressCallBack?.Invoke($"目前已下載進度【{fs.Length}】位元組。");
                             fileContents.Clear();
                         }
 
@@ -265,6 +271,7 @@ namespace GrpcFileClient.Services
                         if (fileContents.Count >= 20)
                         {
                             fileContents.OrderBy(c => c.Block).ToList().ForEach(c => c.Content.WriteTo(fs));
+                            progressCallBack?.Invoke($"目前已下載進度【{fs.Length}】位元組。");
                             fileContents.Clear();
                         }
                     }
