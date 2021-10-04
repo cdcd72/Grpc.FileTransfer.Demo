@@ -28,8 +28,8 @@ namespace GrpcFileClient.Services
         public async Task<TransferResult<List<string>>> FileUpload(
             List<string> filePaths,
             string mark,
-            CancellationToken cancellationToken = new CancellationToken(),
-            Action<string> progressCallBack = null)
+            Action<string> progressCallBack = null,
+            CancellationToken cancellationToken = new CancellationToken())
         {
             var result = new TransferResult<List<string>> { Message = "沒有檔案需要上傳。" };
 
@@ -167,8 +167,8 @@ namespace GrpcFileClient.Services
             List<string> fileNames,
             string mark,
             string saveDirectoryPath,
-            CancellationToken cancellationToken = new CancellationToken(),
-            Action<string> progressCallBack = null)
+            Action<string> progressCallBack = null,
+            CancellationToken cancellationToken = new CancellationToken())
         {
             var result = new TransferResult<List<string>>() { Message = $"檔案儲存路徑不正確：{saveDirectoryPath}。" };
 
