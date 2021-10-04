@@ -52,7 +52,7 @@ namespace GrpcFileClient.Services
 
             try
             {
-                using var call = client.Upload();
+                using var call = client.Upload(default);
 
                 foreach (var filePath in filePaths)
                 {
@@ -199,7 +199,7 @@ namespace GrpcFileClient.Services
 
             try
             {
-                using var call = client.Download(request);
+                using var call = client.Download(request, default);
 
                 var fileContents = new List<DownloadResponse>();
                 var reaponseStream = call.ResponseStream;
