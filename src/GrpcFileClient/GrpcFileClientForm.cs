@@ -56,7 +56,7 @@ namespace GrpcFileClient
             }
 
             var result =
-                await _fileService.FileUpload(filePaths, $"{Guid.NewGuid()}", (progressMessage) => lblMessage.Text = progressMessage, uploadTokenSource.Token);
+                await _fileService.FileUpload(filePaths, progressCallBack: (progressMessage) => lblMessage.Text = progressMessage, cancellationToken: uploadTokenSource.Token);
 
             lblMessage.Text = result.Message;
 
@@ -79,7 +79,7 @@ namespace GrpcFileClient
             var downloadToPath = Path.Combine(_config["FileAccessSettings:Root"], _config["FileAccessSettings:Directory:Download"]);
 
             var result =
-                await _fileService.FileDownload(fileNames, $"{Guid.NewGuid()}", downloadToPath, (progressMessage) => lblMessage1.Text = progressMessage, downloadTokenSource.Token);
+                await _fileService.FileDownload(fileNames, downloadToPath, progressCallBack: (progressMessage) => lblMessage1.Text = progressMessage, cancellationToken: downloadTokenSource.Token);
 
             lblMessage1.Text = result.Message;
 

@@ -27,7 +27,7 @@ namespace GrpcFileClient.Services
 
         public async Task<TransferResult<List<string>>> FileUpload(
             List<string> filePaths,
-            string mark,
+            string mark = null,
             Action<string> progressCallBack = null,
             CancellationToken cancellationToken = new CancellationToken())
         {
@@ -39,6 +39,7 @@ namespace GrpcFileClient.Services
 
             result.Message = "未能連線到伺服器。";
 
+            mark ??= $"{Guid.NewGuid()}";
             var successFilePaths = new List<string>();
 
             FileStream fs = null;
@@ -100,7 +101,7 @@ namespace GrpcFileClient.Services
                             reply.Content = Google.Protobuf.ByteString.CopyFrom(buffer, 0, readSize);
                             await call.RequestStream.WriteAsync(reply);
                             uploadedSize += readSize;
-                            progressCallBack?.Invoke($"目前已上傳進度【{uploadedSize}/{fs.Length}】位元組。");
+                            progressCallBack?.Invoke($"目前【{Path.GetFileName(filePath)}】已上傳進度【{uploadedSize}/{fs.Length}】位元組。");
                         }
                         // Transfer is completed.
                         else
@@ -165,8 +166,8 @@ namespace GrpcFileClient.Services
 
         public async Task<TransferResult<List<string>>> FileDownload(
             List<string> fileNames,
-            string mark,
             string saveDirectoryPath,
+            string mark = null,
             Action<string> progressCallBack = null,
             CancellationToken cancellationToken = new CancellationToken())
         {
@@ -184,6 +185,7 @@ namespace GrpcFileClient.Services
 
             result.Message = "未能連線到伺服器。";
 
+            mark ??= $"{Guid.NewGuid()}";
             var request = new DownloadRequest() { Mark = mark };
             request.Filenames.AddRange(fileNames);
 
@@ -214,7 +216,7 @@ namespace GrpcFileClient.Services
                     // All file transfer completed. (Block = -2)
                     if (reaponseStream.Current.Block == -2)
                     {
-                        result.Message = $"完成下載任務【{successFileNames.Count}/{fileNames.Count}】，耗時：{DateTime.Now - startTime}。";
+                        result.Message = $"完成檔案下載。共計【{successFileNames.Count}/{fileNames.Count}】，耗時：{DateTime.Now - startTime}。";
                         result.IsSuccess = true;
                         break;
                     }
@@ -249,6 +251,8 @@ namespace GrpcFileClient.Services
 
                         fs?.Close();
 
+                        _logger.LogInformation($"完成檔案【{savePath}】的下傳。");
+
                         successFileNames.Add(reaponseStream.Current.Filename);
 
                         savePath = string.Empty;
@@ -271,7 +275,7 @@ namespace GrpcFileClient.Services
                         if (fileContents.Count >= 20)
                         {
                             fileContents.OrderBy(c => c.Block).ToList().ForEach(c => c.Content.WriteTo(fs));
-                            progressCallBack?.Invoke($"目前已下載進度【{fs.Length}】位元組。");
+                            progressCallBack?.Invoke($"目前【{Path.GetFileName(savePath)}】已下載進度【{fs.Length}】位元組。");
                             fileContents.Clear();
                         }
                     }
@@ -299,6 +303,8 @@ namespace GrpcFileClient.Services
             {
                 fs?.Dispose();
             }
+
+            _logger.LogInformation(result.Message);
 
             result.Record = fileNames.Except(successFileNames).ToList();
 
