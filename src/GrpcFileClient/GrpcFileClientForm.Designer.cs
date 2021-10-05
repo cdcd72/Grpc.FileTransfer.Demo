@@ -31,12 +31,12 @@
             this.openFileDialog = new System.Windows.Forms.OpenFileDialog();
             this.FindFilesButton = new System.Windows.Forms.Button();
             this.UploadButton = new System.Windows.Forms.Button();
-            this.lblMessage = new System.Windows.Forms.Label();
+            this.UploadMessage = new System.Windows.Forms.Label();
             this.CancelUploadButton = new System.Windows.Forms.Button();
             this.FileNamesTextBox = new System.Windows.Forms.TextBox();
             this.CancelDownloadButton = new System.Windows.Forms.Button();
             this.DownloadButton = new System.Windows.Forms.Button();
-            this.lblMessage1 = new System.Windows.Forms.Label();
+            this.DownloadMessage = new System.Windows.Forms.Label();
             this.FilePathListBox = new System.Windows.Forms.ListBox();
             this.SelectedFilesLabel = new System.Windows.Forms.Label();
             this.label1 = new System.Windows.Forms.Label();
@@ -66,14 +66,13 @@
             this.UploadButton.UseVisualStyleBackColor = true;
             this.UploadButton.Click += new System.EventHandler(this.UploadButton_Click);
             // 
-            // lblMessage
+            // UploadMessage
             // 
-            this.lblMessage.AutoSize = true;
-            this.lblMessage.Location = new System.Drawing.Point(12, 202);
-            this.lblMessage.Name = "lblMessage";
-            this.lblMessage.Size = new System.Drawing.Size(18, 19);
-            this.lblMessage.TabIndex = 3;
-            this.lblMessage.Text = "...";
+            this.UploadMessage.Location = new System.Drawing.Point(12, 202);
+            this.UploadMessage.Name = "UploadMessage";
+            this.UploadMessage.Size = new System.Drawing.Size(776, 42);
+            this.UploadMessage.TabIndex = 3;
+            this.UploadMessage.Text = "...";
             // 
             // CancelUploadButton
             // 
@@ -87,7 +86,7 @@
             // 
             // FileNamesTextBox
             // 
-            this.FileNamesTextBox.Location = new System.Drawing.Point(11, 265);
+            this.FileNamesTextBox.Location = new System.Drawing.Point(11, 273);
             this.FileNamesTextBox.Multiline = true;
             this.FileNamesTextBox.Name = "FileNamesTextBox";
             this.FileNamesTextBox.Size = new System.Drawing.Size(777, 71);
@@ -95,7 +94,7 @@
             // 
             // CancelDownloadButton
             // 
-            this.CancelDownloadButton.Location = new System.Drawing.Point(128, 348);
+            this.CancelDownloadButton.Location = new System.Drawing.Point(128, 356);
             this.CancelDownloadButton.Name = "CancelDownloadButton";
             this.CancelDownloadButton.Size = new System.Drawing.Size(142, 29);
             this.CancelDownloadButton.TabIndex = 7;
@@ -105,7 +104,7 @@
             // 
             // DownloadButton
             // 
-            this.DownloadButton.Location = new System.Drawing.Point(12, 348);
+            this.DownloadButton.Location = new System.Drawing.Point(12, 356);
             this.DownloadButton.Name = "DownloadButton";
             this.DownloadButton.Size = new System.Drawing.Size(110, 29);
             this.DownloadButton.TabIndex = 6;
@@ -113,14 +112,13 @@
             this.DownloadButton.UseVisualStyleBackColor = true;
             this.DownloadButton.Click += new System.EventHandler(this.DownloadButton_Click);
             // 
-            // lblMessage1
+            // DownloadMessage
             // 
-            this.lblMessage1.AutoSize = true;
-            this.lblMessage1.Location = new System.Drawing.Point(12, 390);
-            this.lblMessage1.Name = "lblMessage1";
-            this.lblMessage1.Size = new System.Drawing.Size(18, 19);
-            this.lblMessage1.TabIndex = 8;
-            this.lblMessage1.Text = "...";
+            this.DownloadMessage.Location = new System.Drawing.Point(12, 396);
+            this.DownloadMessage.Name = "DownloadMessage";
+            this.DownloadMessage.Size = new System.Drawing.Size(776, 46);
+            this.DownloadMessage.TabIndex = 8;
+            this.DownloadMessage.Text = "...";
             // 
             // FilePathListBox
             // 
@@ -144,7 +142,7 @@
             // label1
             // 
             this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(12, 236);
+            this.label1.Location = new System.Drawing.Point(12, 244);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(295, 19);
             this.label1.TabIndex = 11;
@@ -154,16 +152,16 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 19F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(800, 422);
+            this.ClientSize = new System.Drawing.Size(800, 454);
             this.Controls.Add(this.label1);
             this.Controls.Add(this.SelectedFilesLabel);
             this.Controls.Add(this.FilePathListBox);
-            this.Controls.Add(this.lblMessage1);
+            this.Controls.Add(this.DownloadMessage);
             this.Controls.Add(this.CancelDownloadButton);
             this.Controls.Add(this.DownloadButton);
             this.Controls.Add(this.FileNamesTextBox);
             this.Controls.Add(this.CancelUploadButton);
-            this.Controls.Add(this.lblMessage);
+            this.Controls.Add(this.UploadMessage);
             this.Controls.Add(this.UploadButton);
             this.Controls.Add(this.FindFilesButton);
             this.Name = "GrpcFileClientForm";
@@ -178,12 +176,12 @@
         private System.Windows.Forms.OpenFileDialog openFileDialog;
         private System.Windows.Forms.Button FindFilesButton;
         private System.Windows.Forms.Button UploadButton;
-        private System.Windows.Forms.Label lblMessage;
+        private System.Windows.Forms.Label UploadMessage;
         private System.Windows.Forms.Button CancelUploadButton;
         private System.Windows.Forms.TextBox FileNamesTextBox;
         private System.Windows.Forms.Button CancelDownloadButton;
         private System.Windows.Forms.Button DownloadButton;
-        private System.Windows.Forms.Label lblMessage1;
+        private System.Windows.Forms.Label DownloadMessage;
         private System.Windows.Forms.ListBox FilePathListBox;
         private System.Windows.Forms.Label SelectedFilesLabel;
         private System.Windows.Forms.Label label1;

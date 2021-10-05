@@ -4,7 +4,10 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Windows.Forms;
+using GrpcFileClient.Resolvers;
 using GrpcFileClient.Services;
+using GrpcFileClient.Types;
+using Infra.Core.FileAccess.Abstractions;
 using Microsoft.Extensions.Configuration;
 
 namespace GrpcFileClient
@@ -13,13 +16,15 @@ namespace GrpcFileClient
     {
         private readonly IConfiguration _config;
         private readonly FileService _fileService;
+        private readonly IFileAccess _physicalFileAccess;
 
-        public GrpcFileClientForm(IConfiguration config, FileService fileService)
+        public GrpcFileClientForm(IConfiguration config, FileService fileService, FileAccessResolver fileAccessResolver)
         {
             InitializeComponent();
 
             _config = config;
             _fileService = fileService;
+            _physicalFileAccess = fileAccessResolver(FileAccessType.Physical);
         }
 
         private void OpenUploadButton_Click(object sender, EventArgs e)
@@ -44,11 +49,12 @@ namespace GrpcFileClient
 
         private async void UploadButton_Click(object sender, EventArgs e)
         {
-            lblMessage.Text = "正在上傳檔案中...";
+            UploadMessage.Text = "Currently upload file...";
 
             uploadTokenSource = new CancellationTokenSource();
 
             var filePaths = new List<string>();
+            var successFilePaths = new List<string>();
 
             foreach (var item in FilePathListBox.Items)
             {
@@ -56,9 +62,16 @@ namespace GrpcFileClient
             }
 
             var result =
-                await _fileService.FileUpload(filePaths, progressCallBack: (progressMessage) => lblMessage.Text = progressMessage, cancellationToken: uploadTokenSource.Token);
+                await _fileService.FileUpload(filePaths, (progressInfo) =>
+                {
+                    UploadMessage.Text = progressInfo.Message;
 
-            lblMessage.Text = result.Message;
+                    if (progressInfo.IsCompleted)
+                        successFilePaths.Add(progressInfo.FilePath);
+
+                }, uploadTokenSource.Token);
+
+            UploadMessage.Text = $"{result.Message} Complete count:【{successFilePaths.Count}/{filePaths.Count}】.";
 
             uploadTokenSource = null;
         }
@@ -69,7 +82,7 @@ namespace GrpcFileClient
 
         private async void DownloadButton_Click(object sender, EventArgs e)
         {
-            lblMessage1.Text = "正在下載檔案中...";
+            DownloadMessage.Text = "Currently download file...";
 
             downloadTokenSource = new CancellationTokenSource();
 
@@ -79,9 +92,14 @@ namespace GrpcFileClient
             var downloadToPath = Path.Combine(_config["FileAccessSettings:Root"], _config["FileAccessSettings:Directory:Download"]);
 
             var result =
-                await _fileService.FileDownload(fileNames, downloadToPath, progressCallBack: (progressMessage) => lblMessage1.Text = progressMessage, cancellationToken: downloadTokenSource.Token);
+                await _fileService.FileDownloadTest(fileNames, (progressInfo) => DownloadMessage.Text = progressInfo.Message, downloadTokenSource.Token);
 
-            lblMessage1.Text = result.Message;
+            foreach (var file in result.Record)
+            {
+                await _physicalFileAccess.SaveFileAsync(Path.Combine(downloadToPath, file.Key), file.Value);
+            }
+
+            DownloadMessage.Text = $"{result.Message} Complete count:【{result.Record.Count}/{fileNames.Count}】.";
 
             downloadTokenSource = null;
         }

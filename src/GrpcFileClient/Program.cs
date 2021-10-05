@@ -1,8 +1,10 @@
 using System;
 using System.IO;
 using System.Windows.Forms;
+using GrpcFileClient.Resolvers;
 using GrpcFileClient.Services;
-using Infra.Core.FileAccess.Abstractions;
+using GrpcFileClient.Types;
+using Infra.FileAccess.Grpc;
 using Infra.FileAccess.Physical;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Configuration.Json;
@@ -54,7 +56,15 @@ namespace GrpcFileClient
 
             #endregion
 
-            services.AddSingleton<IFileAccess, PhysicalFileAccess>();
+            services.AddSingleton<PhysicalFileAccess>();
+            services.AddSingleton<GrpcFileAccess>();
+            services.AddSingleton<FileAccessResolver>(
+                sp => fileAccessType => fileAccessType switch
+                {
+                    FileAccessType.Physical => sp.GetRequiredService<PhysicalFileAccess>(),
+                    FileAccessType.Grpc => sp.GetRequiredService<GrpcFileAccess>(),
+                    _ => null,
+                });
 
             services.AddScoped<FileService>();
 
