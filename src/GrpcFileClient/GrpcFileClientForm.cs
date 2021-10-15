@@ -54,7 +54,7 @@ namespace GrpcFileClient
             uploadTokenSource = new CancellationTokenSource();
 
             var filePaths = new List<string>();
-            var successFilePaths = new List<string>();
+            var successFileNames = new List<string>();
 
             foreach (var item in FilePathListBox.Items)
             {
@@ -67,11 +67,11 @@ namespace GrpcFileClient
                     UploadMessage.Text = progressInfo.Message;
 
                     if (progressInfo.IsCompleted)
-                        successFilePaths.Add(progressInfo.FilePath);
+                        successFileNames.Add(progressInfo.FileName);
 
                 }, uploadTokenSource.Token);
 
-            UploadMessage.Text = $"{result.Message} Complete count:【{successFilePaths.Count}/{filePaths.Count}】.";
+            UploadMessage.Text = $"{result.Message} Complete count:【{successFileNames.Count}/{filePaths.Count}】.";
 
             uploadTokenSource = null;
         }
@@ -97,9 +97,21 @@ namespace GrpcFileClient
             var result =
                 await _fileService.FileDownload(fileNames, (progressInfo) => DownloadMessage.Text = progressInfo.Message, downloadTokenSource.Token);
 
+            var downloadToSubPath = string.Empty;
+            var fileName = string.Empty;
+
             foreach (var file in result.Record)
             {
-                await _physicalFileAccess.SaveFileAsync(Path.Combine(downloadToPath, file.Key), file.Value);
+                // file.Key value may be:
+                // 1. 123.txt
+                // 2. Data\\123.txt
+                downloadToSubPath = Path.Combine(downloadToPath, Path.GetDirectoryName(file.Key));
+                fileName = Path.GetFileName(file.Key);
+
+                if (!_physicalFileAccess.DirectoryExists(downloadToSubPath))
+                    _physicalFileAccess.CreateDirectory(downloadToSubPath);
+
+                await _physicalFileAccess.SaveFileAsync(Path.Combine(downloadToSubPath, fileName), file.Value);
             }
 
             DownloadMessage.Text = $"{result.Message} Complete count:【{result.Record.Count}/{fileNames.Count}】.";

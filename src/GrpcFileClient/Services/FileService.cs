@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using GrpcFileClient.Models;
@@ -56,7 +57,7 @@ namespace GrpcFileClient.Services
                 {
                     var fileBytes = await _physicalFileAccess.ReadFileAsync(filePath, progressCallBack, cancellationToken);
 
-                    await _grpcFileAccess.SaveFileAsync(filePath, fileBytes, progressCallBack, cancellationToken);
+                    await _grpcFileAccess.SaveFileAsync(Path.GetFileName(filePath), fileBytes, progressCallBack, cancellationToken);
                 }
                 catch (Exception)
                 {
@@ -95,10 +96,13 @@ namespace GrpcFileClient.Services
 
                 try
                 {
-                    var fileBytes = await _grpcFileAccess.ReadFileAsync(fileName, progressCallBack, cancellationToken);
+                    if (await _grpcFileAccess.FileExistsAsync(fileName, progressCallBack, cancellationToken))
+                    {
+                        var fileBytes = await _grpcFileAccess.ReadFileAsync(fileName, progressCallBack, cancellationToken);
 
-                    if (fileBytes != null)
-                        downloadedFiles.Add(fileName, fileBytes);
+                        if (fileBytes != null)
+                            downloadedFiles.Add(fileName, fileBytes);
+                    }
                 }
                 catch (Exception)
                 {
