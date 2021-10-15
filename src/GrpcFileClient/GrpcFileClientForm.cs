@@ -91,8 +91,11 @@ namespace GrpcFileClient
 
             var downloadToPath = Path.Combine(_config["FileAccessSettings:Root"], _config["FileAccessSettings:Directory:Download"]);
 
+            if (!_physicalFileAccess.DirectoryExists(downloadToPath))
+                _physicalFileAccess.CreateDirectory(downloadToPath);
+
             var result =
-                await _fileService.FileDownloadTest(fileNames, (progressInfo) => DownloadMessage.Text = progressInfo.Message, downloadTokenSource.Token);
+                await _fileService.FileDownload(fileNames, (progressInfo) => DownloadMessage.Text = progressInfo.Message, downloadTokenSource.Token);
 
             foreach (var file in result.Record)
             {

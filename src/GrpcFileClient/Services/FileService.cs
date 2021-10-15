@@ -54,7 +54,9 @@ namespace GrpcFileClient.Services
 
                 try
                 {
-                    await _grpcFileAccess.SaveFileAsync(filePath, progressCallBack, cancellationToken);
+                    var fileBytes = await _physicalFileAccess.ReadFileAsync(filePath, progressCallBack, cancellationToken);
+
+                    await _grpcFileAccess.SaveFileAsync(filePath, fileBytes, progressCallBack, cancellationToken);
                 }
                 catch (Exception)
                 {
@@ -67,7 +69,7 @@ namespace GrpcFileClient.Services
             return result;
         }
 
-        public async Task<TransferResult<Dictionary<string, byte[]>>> FileDownloadTest(
+        public async Task<TransferResult<Dictionary<string, byte[]>>> FileDownload(
             List<string> fileNames,
             Action<ProgressInfo> progressCallBack = null,
             CancellationToken cancellationToken = new CancellationToken())
