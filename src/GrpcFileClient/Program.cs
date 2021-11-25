@@ -56,7 +56,7 @@ namespace GrpcFileClient
 
             #endregion
 
-            services.AddSingleton<PhysicalFileAccess>();
+            services.AddSingleton(new PhysicalFileAccess(config.GetSection("FileAccessSettings:Root").Value));
             services.AddSingleton<GrpcFileAccess>();
             services.AddSingleton<FileAccessResolver>(
                 sp => fileAccessType => fileAccessType switch
