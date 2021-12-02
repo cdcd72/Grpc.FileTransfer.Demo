@@ -67,7 +67,7 @@ namespace GrpcFileClient
                     UploadMessage.Text = progressInfo.Message;
 
                     if (progressInfo.IsCompleted)
-                        successFileNames.Add(progressInfo.FileName);
+                        successFileNames.Add(progressInfo.Result);
 
                 }, uploadTokenSource.Token);
 
