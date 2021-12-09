@@ -36,7 +36,7 @@ namespace GrpcFileClient.Services
             if (filePaths.Count == 0)
             {
                 result.Message = "No file to upload.";
-                return await Task.Run(() => result, cancellationToken);
+                return result;
             }
 
             foreach (var filePath in filePaths)
@@ -77,14 +77,14 @@ namespace GrpcFileClient.Services
             CancellationToken cancellationToken = new CancellationToken())
         {
             var result = new TransferResult<Dictionary<string, byte[]>>();
+            var downloadedFiles = new Dictionary<string, byte[]>();
 
             if (fileNames.Count == 0)
             {
                 result.Message = "No file to download.";
-                return await Task.Run(() => result, cancellationToken);
+                result.Record = downloadedFiles;
+                return result;
             }
-
-            var downloadedFiles = new Dictionary<string, byte[]>();
 
             foreach (var fileName in fileNames)
             {
