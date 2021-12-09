@@ -39,17 +39,14 @@ namespace GrpcFileClient
 
             var result = openFileDialog.ShowDialog();
 
-            if (result == DialogResult.OK)
-                return openFileDialog.FileNames;
-
-            return Array.Empty<string>();
+            return result == DialogResult.OK ? openFileDialog.FileNames : Array.Empty<string>();
         }
 
         private CancellationTokenSource uploadTokenSource;
 
         private async void UploadButton_Click(object sender, EventArgs e)
         {
-            UploadMessage.Text = "Currently upload file...";
+            UploadMessage.Text = @"Currently upload file...";
 
             uploadTokenSource = new CancellationTokenSource();
 
@@ -71,7 +68,7 @@ namespace GrpcFileClient
 
                 }, uploadTokenSource.Token);
 
-            UploadMessage.Text = $"{result.Message} Complete count:【{successFileNames.Count}/{filePaths.Count}】.";
+            UploadMessage.Text = $@"{result.Message} Complete count:【{successFileNames.Count}/{filePaths.Count}】.";
 
             uploadTokenSource = null;
         }
@@ -82,7 +79,7 @@ namespace GrpcFileClient
 
         private async void DownloadButton_Click(object sender, EventArgs e)
         {
-            DownloadMessage.Text = "Currently download file...";
+            DownloadMessage.Text = @"Currently download file...";
 
             downloadTokenSource = new CancellationTokenSource();
 
@@ -97,24 +94,21 @@ namespace GrpcFileClient
             var result =
                 await _fileService.FileDownload(fileNames, (progressInfo) => DownloadMessage.Text = progressInfo.Message, downloadTokenSource.Token);
 
-            var downloadToSubPath = string.Empty;
-            var fileName = string.Empty;
-
-            foreach (var file in result.Record)
+            foreach (var (key, value) in result.Record)
             {
                 // file.Key value may be:
                 // 1. 123.txt
                 // 2. Data\\123.txt
-                downloadToSubPath = Path.Combine(downloadToPath, Path.GetDirectoryName(file.Key));
-                fileName = Path.GetFileName(file.Key);
+                var downloadToSubPath = Path.Combine(downloadToPath, Path.GetDirectoryName(key)!);
+                var fileName = Path.GetFileName(key);
 
                 if (!_physicalFileAccess.DirectoryExists(downloadToSubPath))
                     _physicalFileAccess.CreateDirectory(downloadToSubPath);
 
-                await _physicalFileAccess.SaveFileAsync(Path.Combine(downloadToSubPath, fileName), file.Value);
+                await _physicalFileAccess.SaveFileAsync(Path.Combine(downloadToSubPath, fileName), value);
             }
 
-            DownloadMessage.Text = $"{result.Message} Complete count:【{result.Record.Count}/{fileNames.Count}】.";
+            DownloadMessage.Text = $@"{result.Message} Complete count:【{result.Record.Count}/{fileNames.Count}】.";
 
             downloadTokenSource = null;
         }

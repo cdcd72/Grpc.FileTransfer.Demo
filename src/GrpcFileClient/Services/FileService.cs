@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using GrpcFileClient.Models;
 using GrpcFileClient.Resolvers;
 using GrpcFileClient.Types;
+using Infra.Core.Extensions;
 using Infra.Core.FileAccess.Abstractions;
 using Infra.Core.FileAccess.Models;
 using Microsoft.Extensions.Logging;
@@ -35,7 +36,7 @@ namespace GrpcFileClient.Services
             if (filePaths.Count == 0)
             {
                 result.Message = "No file to upload.";
-                return await Task.Run(() => result);
+                return await Task.Run(() => result, cancellationToken);
             }
 
             foreach (var filePath in filePaths)
@@ -49,7 +50,7 @@ namespace GrpcFileClient.Services
 
                 if (!_physicalFileAccess.FileExists(filePath))
                 {
-                    _logger.LogInformation($"File【{filePath}】not exists.");
+                    _logger.Information($"File【{filePath}】not exists.");
                     continue;
                 }
 
@@ -80,7 +81,7 @@ namespace GrpcFileClient.Services
             if (fileNames.Count == 0)
             {
                 result.Message = "No file to download.";
-                return await Task.Run(() => result);
+                return await Task.Run(() => result, cancellationToken);
             }
 
             var downloadedFiles = new Dictionary<string, byte[]>();
