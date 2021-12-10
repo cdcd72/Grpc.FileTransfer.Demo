@@ -86,7 +86,7 @@ namespace GrpcFileClient
             var fileNames = FileNamesTextBox.Text.Split(',', StringSplitOptions.RemoveEmptyEntries)
                                                  .ToList();
 
-            var downloadToPath = Path.Combine(_config["FileAccessSettings:Root"], _config["FileAccessSettings:Directory:Download"]);
+            var downloadToPath = Path.Combine(_config["File:Root"], _config["File:Directory:Download"]);
 
             if (!_physicalFileAccess.DirectoryExists(downloadToPath))
                 _physicalFileAccess.CreateDirectory(downloadToPath);

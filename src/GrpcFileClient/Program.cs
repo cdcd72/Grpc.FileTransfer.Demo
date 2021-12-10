@@ -6,6 +6,8 @@ using GrpcFileClient.Services;
 using GrpcFileClient.Types;
 using Infra.FileAccess.Grpc;
 using Infra.FileAccess.Physical;
+using PhysicalFileAccessConfig = Infra.FileAccess.Physical.Configuration;
+using GrpcFileAccessConfig = Infra.FileAccess.Grpc.Configuration;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Configuration.Json;
 using Microsoft.Extensions.DependencyInjection;
@@ -56,7 +58,10 @@ namespace GrpcFileClient
 
             #endregion
 
-            services.AddSingleton(new PhysicalFileAccess(config.GetSection("FileAccessSettings:Root").Value));
+            services.Configure<PhysicalFileAccessConfig.Settings>(settings => config.GetSection(PhysicalFileAccessConfig.Settings.SectionName).Bind(settings));
+            services.Configure<GrpcFileAccessConfig.Settings>(settings => config.GetSection(GrpcFileAccessConfig.Settings.SectionName).Bind(settings));
+
+            services.AddSingleton<PhysicalFileAccess>();
             services.AddSingleton<GrpcFileAccess>();
             services.AddSingleton<FileAccessResolver>(
                 sp => fileAccessType => fileAccessType switch
