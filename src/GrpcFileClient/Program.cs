@@ -14,66 +14,65 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.FileProviders;
 using NLog.Extensions.Logging;
 
-namespace GrpcFileClient
+namespace GrpcFileClient;
+
+internal static class Program
 {
-    internal static class Program
+    [STAThread]
+    internal static void Main()
     {
-        [STAThread]
-        internal static void Main()
+        Application.SetHighDpiMode(HighDpiMode.SystemAware);
+        Application.EnableVisualStyles();
+        Application.SetCompatibleTextRenderingDefault(false);
+
+        var services = new ServiceCollection();
+
+        ConfigureServices(services);
+
+        using var sp = services.BuildServiceProvider();
+
+        var grpcFileClientForm = sp.GetRequiredService<GrpcFileClientForm>();
+
+        Application.Run(grpcFileClientForm);
+    }
+
+    private static void ConfigureServices(ServiceCollection services)
+    {
+        services.AddLogging(builder => builder.AddNLog("Nlog.config"));
+
+        #region Configuration
+
+        var releaseJsonSource = new JsonConfigurationSource()
         {
-            Application.SetHighDpiMode(HighDpiMode.SystemAware);
-            Application.EnableVisualStyles();
-            Application.SetCompatibleTextRenderingDefault(false);
+            FileProvider = new PhysicalFileProvider(Directory.GetCurrentDirectory()),
+            Path = "appsettings.json",
+            Optional = false,
+            ReloadOnChange = true
+        };
 
-            var services = new ServiceCollection();
+        var config = new ConfigurationBuilder()
+            .Add(releaseJsonSource)
+            .Build();
 
-            ConfigureServices(services);
+        services.AddSingleton<IConfiguration>(config);
 
-            using var sp = services.BuildServiceProvider();
+        #endregion
 
-            var grpcFileClientForm = sp.GetRequiredService<GrpcFileClientForm>();
+        services.Configure<PhysicalFileAccessConfig.Settings>(settings => config.GetSection(PhysicalFileAccessConfig.Settings.SectionName).Bind(settings));
+        services.Configure<GrpcFileAccessConfig.Settings>(settings => config.GetSection(GrpcFileAccessConfig.Settings.SectionName).Bind(settings));
 
-            Application.Run(grpcFileClientForm);
-        }
-
-        private static void ConfigureServices(ServiceCollection services)
-        {
-            services.AddLogging(builder => builder.AddNLog("Nlog.config"));
-
-            #region Configuration
-
-            var releaseJsonSource = new JsonConfigurationSource()
+        services.AddSingleton<PhysicalFileAccess>();
+        services.AddSingleton<GrpcFileAccess>();
+        services.AddSingleton<FileAccessResolver>(
+            sp => fileAccessType => fileAccessType switch
             {
-                FileProvider = new PhysicalFileProvider(Directory.GetCurrentDirectory()),
-                Path = "appsettings.json",
-                Optional = false,
-                ReloadOnChange = true
-            };
+                FileAccessType.Physical => sp.GetRequiredService<PhysicalFileAccess>(),
+                FileAccessType.Grpc => sp.GetRequiredService<GrpcFileAccess>(),
+                _ => null,
+            });
 
-            var config = new ConfigurationBuilder()
-                .Add(releaseJsonSource)
-                .Build();
+        services.AddScoped<FileService>();
 
-            services.AddSingleton<IConfiguration>(config);
-
-            #endregion
-
-            services.Configure<PhysicalFileAccessConfig.Settings>(settings => config.GetSection(PhysicalFileAccessConfig.Settings.SectionName).Bind(settings));
-            services.Configure<GrpcFileAccessConfig.Settings>(settings => config.GetSection(GrpcFileAccessConfig.Settings.SectionName).Bind(settings));
-
-            services.AddSingleton<PhysicalFileAccess>();
-            services.AddSingleton<GrpcFileAccess>();
-            services.AddSingleton<FileAccessResolver>(
-                sp => fileAccessType => fileAccessType switch
-                {
-                    FileAccessType.Physical => sp.GetRequiredService<PhysicalFileAccess>(),
-                    FileAccessType.Grpc => sp.GetRequiredService<GrpcFileAccess>(),
-                    _ => null,
-                });
-
-            services.AddScoped<FileService>();
-
-            services.AddScoped<GrpcFileClientForm>();
-        }
+        services.AddScoped<GrpcFileClientForm>();
     }
 }

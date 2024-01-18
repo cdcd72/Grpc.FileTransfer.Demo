@@ -1,9 +1,8 @@
-namespace GrpcFileClient.Models
-{
-    public class TransferResult<T>
-    {
-        public string Message { get; set; }
+namespace GrpcFileClient.Models;
 
-        public T Record { get; set; }
-    }
+public class TransferResult<T>
+{
+    public string Message { get; set; }
+
+    public T Record { get; set; }
 }

@@ -1,8 +1,7 @@
-namespace GrpcFileClient.Types
+namespace GrpcFileClient.Types;
+
+public enum FileAccessType
 {
-    public enum FileAccessType
-    {
-        Physical,
-        Grpc
-    }
+    Physical,
+    Grpc
 }
